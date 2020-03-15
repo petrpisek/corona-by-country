@@ -6,7 +6,7 @@ const { getCode, getName, getData, overwrite } = require("country-list");
 export const DataController = (props) => {
 
     const [data, setData] = useState(null);
-    const [selected, setSelected] = useState({});
+    const [selected, setSelected] = useState([]);
 
     function CSVtoArray(text) {
         var re_valid = /^\s*(?:'[^'\\]*(?:\\[\S\s][^'\\]*)*'|"[^"\\]*(?:\\[\S\s][^"\\]*)*"|[^,'"\s\\]*(?:\s+[^,'"\s\\]+)*)\s*(?:,\s*(?:'[^'\\]*(?:\\[\S\s][^'\\]*)*'|"[^"\\]*(?:\\[\S\s][^"\\]*)*"|[^,'"\s\\]*(?:\s+[^,'"\s\\]+)*)\s*)*$/;
@@ -98,10 +98,16 @@ export const DataController = (props) => {
         f();
     }, [])
 
+    const handleSelect = s => {
+        // let newSelected = {...selected};
+        // newSelected[code] = !selected[code];
+
+        setSelected(s);
+    }
     return (
         <div>
             <div>
-                <Map data={data} onSelect={async code => setSelected({ ...selected, [code]: !selected[code] })} />
+                <Map data={data} onSelect={handleSelect} />
 
             </div>
             <div>

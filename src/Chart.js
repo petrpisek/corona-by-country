@@ -21,16 +21,16 @@ export const Chart = ({ data, selected }) => {
     let graph = {};
     let counter = 0;
     
-    if (!selected || !Object.keys(selected) || !Object.keys(selected).find(x => selected[x])) {        
+    if (!selected || !selected.length) {        
         graph=[{
             type: "line",
             dataPoints: data.dates.map((date, i) => ({ x: new Date(date), y: Number(data.world[i]) }))
         }]
     }
     else {
-        counter = Object.keys(selected).filter(x => selected[x]).length;
+        counter = selected.length;
 
-        graph = Object.keys(selected).filter(x => selected[x]).map(selectedCountry => ({
+        graph = selected.map(selectedCountry => ({
             type: "line",
             dataPoints: buildData(selectedCountry)
         }))
@@ -38,7 +38,7 @@ export const Chart = ({ data, selected }) => {
 
     const options = {
         title: {
-            text: counter ? `${Object.keys(selected).filter(x => selected[x]).map(x => getName(x)).join(", ")}` : "World"
+            text: counter ? `${selected.map(x => getName(x)).join(", ")}` : "World"
         },
         data: graph
      }

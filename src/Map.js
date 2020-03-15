@@ -17,8 +17,13 @@ const Map = ({ data, onSelect }) => {
 
     const [totalData, setTotalData] = useState([]);
 
-    const handleClick = async (e, countryCode) => {
+    const handleClick = (e, countryCode) => {
         onSelect(countryCode);
+        console.log(e)
+    };
+
+    const handleSelect = (e, code, isSelected, selectedRegions) => {
+        onSelect(selectedRegions);
         console.log(e)
     };
 
@@ -36,8 +41,7 @@ const Map = ({ data, onSelect }) => {
                     width: "100%",
                     height: "520px"
                 }}
-                onRegionClick={handleClick} //gets the country code
-                onRegionTipShow={(e, el, code) => e.preventDefault()}
+                onRegionSelected={handleSelect} //gets the country code            
                 containerClassName="map"
                 regionStyle={{
                     initial: {
