@@ -2,13 +2,12 @@ import React, { useState } from "react";
 import ReactDOM from "react-dom";
 import './App.css';
 
-import MapChart from "./MapChart";
+import { DataController } from "./DataController"
 
-function App() {
-  const [content, setContent] = useState("");
+function App() {  
   return (
     <div>
-      <MapChart setTooltipContent={setContent} />      
+      <DataController />      
     </div>
   );
 }

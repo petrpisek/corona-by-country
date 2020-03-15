@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useState } from "react";
-import { ComposableMap, Geographies, Geography, ZoomableGroup } from "react-simple-maps";
-import { LineChart, XAxis, Tooltip, CartesianGrid, Line } from "recharts";
+import { VectorMap } from "react-jvectormap"
+
 const geoUrl =
     "https://raw.githubusercontent.com/zcreativelabs/react-simple-maps/master/topojson-maps/world-110m.json";
 
@@ -33,6 +33,21 @@ const MapChart = ({ setTooltipContent }) => {
         setZoom(position.zoom);
     }
 
+    const handleClick = (e, countryCode) => {
+        console.log(countryCode);
+    };
+
+    const mapData = {
+        CN: 100000,
+        IN: 9900,
+        SA: 86,
+        EG: 70,
+        SE: 0,
+        FI: 0,
+        FR: 0,
+        US: 20
+    };
+
     useEffect(async () => {
         async function f() {
             const d = await fetch("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv")
@@ -45,81 +60,46 @@ const MapChart = ({ setTooltipContent }) => {
     }, [])
 
     return (
-        <>
-            <ComposableMap data-tip="" projectionConfig={{ scale: 200 }} className="map">
-                <ZoomableGroup zoom={zoom} onZoomEnd={handleZoomEnd}>
-                    <Geographies geography={geoUrl}>
-                        {({ geographies }) =>
-                            geographies.map(geo => (
-                                <Geography
-                                    key={geo.rsmKey}
-                                    geography={geo}
-                                    onMouseEnter={() => {
-                                        const { NAME, POP_EST } = geo.properties;
-                                        setTooltipContent(`${NAME} — ${rounded(POP_EST)}`);
-                                    }}
-                                    onMouseDown={() => {
-                                        const s = JSON.parse(JSON.stringify(selected));
-                                        if (s[geo.properties.ISO_A3])
-                                            delete s[geo.properties.ISO_A3];
-                                        else
-                                            s[geo.properties.ISO_A3] = geo.properties;
-                                        setSelected(s);
-                                    }}
-                                    onMouseLeave={() => {
-                                        setTooltipContent("");
-                                    }}
-                                    style={{
-                                        default: selected[geo.properties.ISO_A3] ? {
-                                            fill: "#F30",
-                                            outline: "#F00"
-                                        } : {
-                                                fill: "#000",
-                                                outline: "none"
-                                            },
-                                        hover: {
-                                            fill: "#F53",
-                                            outline: "none"
-                                        },
-                                        pressed: {
-                                            fill: "#E42",
-                                            outline: "none"
-                                        }
-                                    }}
-                                />
-                            ))
+        <div>
+            <VectorMap
+                map={"world_mill"}
+                backgroundColor="transparent" //change it to ocean blue: #0077be
+                zoomOnScroll={false}
+                containerStyle={{
+                    width: "100%",
+                    height: "520px"
+                }}
+                onRegionClick={handleClick} //gets the country code
+                containerClassName="map"
+                regionStyle={{
+                    initial: {
+                        fill: "#e4e4e4",
+                        "fill-opacity": 0.9,
+                        stroke: "none",
+                        "stroke-width": 0,
+                        "stroke-opacity": 0
+                    },
+                    hover: {
+                        "fill-opacity": 0.8,
+                        cursor: "pointer"
+                    },
+                    selected: {
+                        fill: "#2938bc" //color for the clicked country
+                    },
+                    selectedHover: {}
+                }}
+                regionsSelectable={true}
+                series={{
+                    regions: [
+                        {
+                            values: mapData, //this is your data
+                            scale: ["#146804", "#ff0000"], //your color game's here
+                            normalizeFunction: "polynomial"
                         }
-                    </Geographies>
-                </ZoomableGroup>
-            </ComposableMap>
-            <div className="controls">
-                <button onClick={handleZoomIn}>
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth="3"
-                    >
-                        <line x1="12" y1="5" x2="12" y2="19" />
-                        <line x1="5" y1="12" x2="19" y2="12" />
-                    </svg>
-                </button>
-                <button onClick={handleZoomOut}>
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth="3"
-                    >
-                        <line x1="5" y1="12" x2="19" y2="12" />
-                    </svg>
-                </button>
-            </div>
-            <div>
+                    ]
+                }}
+            />
+            {/* <div>
                 {
                     Object.keys(selected).map(x =>
                         <div>
@@ -137,8 +117,8 @@ const MapChart = ({ setTooltipContent }) => {
                             </LineChart>
                         </div>)
                 }
-            </div>
-        </>
+            </div> */}
+        </div>
     );
 };
 
