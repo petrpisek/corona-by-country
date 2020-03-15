@@ -53,7 +53,7 @@ export const DataController = (props) => {
             const countryData = {};
             const countries = {};
             let world = null;
-
+            let worldWithoutChina = null;
             d.forEach((element, i) => {
                 if (!element)
                     return;
@@ -76,15 +76,28 @@ export const DataController = (props) => {
                         countries[code][i] += Number(numbers[i]);
                     }
                 } else {
-                    countries[code] = numbers;
+                    countries[code] = [...numbers];
                 }
 
                 if(!world) {
-                    world = numbers;
+                    world = [...numbers];
                 }
                 else {
                     for(i = 0; i <world.length; i++) {
                         world[i] += Number(numbers[i]);
+                    }
+                }
+
+                if(code === "CN") {
+                    return;
+                }
+
+                if(!worldWithoutChina) {
+                    worldWithoutChina = [...numbers];
+                }
+                else {
+                    for(i = 0; i <worldWithoutChina.length; i++) {
+                        worldWithoutChina[i] += Number(numbers[i]);
                     }
                 }
             });
@@ -93,7 +106,7 @@ export const DataController = (props) => {
                 console.log(`${key}: ${countryData[key]}`)
             });
 
-            setData({ dates: dates, totalData: countryData, countries: countries, world: world })
+            setData({ dates: dates, totalData: countryData, countries: countries, world: world, worldWithoutChina:worldWithoutChina })
         }
         f();
     }, [])

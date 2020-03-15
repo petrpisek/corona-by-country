@@ -39,7 +39,8 @@ const Map = ({ data, onSelect }) => {
                 zoomOnScroll={true}
                 containerStyle={{
                     width: "100%",
-                    height: "520px"
+                    height: "520px",
+                    maxHeight: "50vh"
                 }}
                 onRegionSelected={handleSelect} //gets the country code            
                 containerClassName="map"
