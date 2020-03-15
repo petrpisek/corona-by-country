@@ -2,6 +2,8 @@ import React, { memo, useEffect, useState } from "react";
 
 import CanvasJSReact from './lib/canvasjs.react';
 import "./lib/jquery-jvectormap.css"
+const {getName } = require("country-list");
+
 //var CanvasJSReact = require('./canvasjs.react');
 var CanvasJS = CanvasJSReact.CanvasJS;
 var CanvasJSChart = CanvasJSReact.CanvasJSChart;
@@ -10,6 +12,8 @@ export const Chart = ({ data, selected }) => {
     if(!data || !data.dates)
         return null;
     const buildData = (selectedCountry) => {
+        if(!data.countries[selectedCountry])
+            return null;
         const result = data.dates.map((date, i) => ({ x: new Date(date), y: Number(data.countries[selectedCountry][i]) }));
         return result;
     }
@@ -34,7 +38,7 @@ export const Chart = ({ data, selected }) => {
 
     const options = {
         title: {
-            text: counter ? `${Object.keys(selected).filter(x => selected[x]).join(", ")}` : "World"
+            text: counter ? `${Object.keys(selected).filter(x => selected[x]).map(x => getName(x)).join(", ")}` : "World"
         },
         data: graph
      }
