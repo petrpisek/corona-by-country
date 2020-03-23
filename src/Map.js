@@ -7,12 +7,12 @@ const Map = ({ data, onSelect }) => {
 
     const handleClick = (e, countryCode) => {
         onSelect(countryCode);
-       
+
     };
 
     const handleSelect = (e, code, isSelected, selectedRegions) => {
         onSelect(selectedRegions);
-       
+
     };
 
     useEffect(() => {
@@ -25,13 +25,14 @@ const Map = ({ data, onSelect }) => {
                 map={"world_mill"}
                 backgroundColor="transparent" //change it to ocean blue: #0077be
                 zoomOnScroll={true}
+                zoomMax={100}
+                containerClassName="map"
                 containerStyle={{
-                    width: "100%",
+                    
                     height: "520px",
-                    maxHeight: "50vh"
+                    
                 }}
                 onRegionSelected={handleSelect} //gets the country code            
-                containerClassName="map"
                 regionStyle={{
                     initial: {
                         fill: "#e4e4e4",

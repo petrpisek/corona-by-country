@@ -42,9 +42,10 @@ export const DataController = (props) => {
     const [data, setData] = useState(null);
     const [deathsData, setDeathsData] = useState(null);
     const [activeData, setActiveData] = useState(null);
-    
+
     const [selected, setSelected] = useState([]);
     const [graphType, setGraphType] = useState("total");
+    const [predictionPeriod, setPredictionPeriod] = useState(7);
 
     function CSVtoArray(text) {
         var re_valid = /^\s*(?:'[^'\\]*(?:\\[\S\s][^'\\]*)*'|"[^"\\]*(?:\\[\S\s][^"\\]*)*"|[^,'"\s\\]*(?:\s+[^,'"\s\\]+)*)\s*(?:,\s*(?:'[^'\\]*(?:\\[\S\s][^'\\]*)*'|"[^"\\]*(?:\\[\S\s][^"\\]*)*"|[^,'"\s\\]*(?:\s+[^,'"\s\\]+)*)\s*)*$/;
@@ -115,7 +116,7 @@ export const DataController = (props) => {
 
         const d = dataType === "total" ? await historicalData : await deathsData;
         var allCases, recoveredCases;
-        if(dataType === "active") {
+        if (dataType === "active") {
             allCases = await historicalData;
             recoveredCases = await recoveredData;
         }
@@ -146,14 +147,14 @@ export const DataController = (props) => {
                 return;
             }
 
-            countryData[code] = (countryData[code] || 0) + dataType === "active" 
-            ? Number(allCases[i][element.length - 1]) - Number(element[element.length - 1]) - Number(recoveredCases[element.length - 1]) 
-            : Number(element[element.length - 1]);
+            countryData[code] = (countryData[code] || 0) + dataType === "active"
+                ? Number(allCases[i][element.length - 1]) - Number(element[element.length - 1]) - Number(recoveredCases[element.length - 1])
+                : Number(element[element.length - 1]);
 
             var activeElement = dataType === "active" ? allCases[i].slice(4) : {};
             var recoveredElement = dataType === "active" ? recoveredCases[i].slice(4) : {};
-            
-            var numbers = element.slice(4).map((x, i) => dataType === "active" ? Number(activeElement[i]) - Number(x) -  Number(recoveredElement[i]): Number(x) );
+
+            var numbers = element.slice(4).map((x, i) => dataType === "active" ? Number(activeElement[i]) - Number(x) - Number(recoveredElement[i]) : Number(x));
 
             if (countries[code]) {
                 for (i = 0; i < countries[code].length; i++) {
@@ -222,8 +223,8 @@ export const DataController = (props) => {
 
     useEffect(() => {
         loadData("total").then(x => setData(x));
-        loadData("deaths").then(x => setDeathsData(x));     
-        loadData("active").then(x => setActiveData(x));     
+        loadData("deaths").then(x => setDeathsData(x));
+        loadData("active").then(x => setActiveData(x));
     }, [])
 
     const handleSelect = s => {
@@ -236,21 +237,54 @@ export const DataController = (props) => {
     useEffect(() => {
         loadData(graphType);
     }, []);
+    const handlePredictionPeriodChange = e => {
+        var value = Number(e.target.value);
+        setPredictionPeriod(value);
+    }
 
     return (
         <div>
             <div>
                 <Map data={data} onSelect={handleSelect} />
             </div>
-            <div style={{textAlign: "center"}}>
-                <label><input type="radio" name="total" value="total" checked={graphType === "total"} onClick={() => setGraphType("total")} /> Total</label>
-                <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
-                <label><input type="radio" name="deaths" value="deaths" checked={graphType === "deaths"} onClick={() => setGraphType("deaths")} /> Deaths</label>
-                <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
-                <label><input type="radio" name="active" value="active" checked={graphType === "active"} onClick={() => setGraphType("active")} /> Active</label>
+            <div className="params">
+                <label>Graph values:&nbsp;
+                <select value={graphType} onChange={e => setGraphType(e.target.value)}>
+                        <option value="total">Total cases</option>
+                        <option value="deaths">Deaths</option>
+                        <option value="active">Active cases</option>
+                    </select>
+                </label>
+                <span>&nbsp;&nbsp;&nbsp;</span>
+                <label>Prediction:&nbsp;
+                <select value={predictionPeriod} onChange={handlePredictionPeriodChange}>
+                        {
+                            [...Array(20).keys()].map(x => <option value={x}>{x}</option>)
+                        }
+                    </select>
+                </label>
             </div>
-            <div>
-                <Chart data={graphType === "total" ? data : graphType === "active" ? activeData : deathsData} selected={selected} graphType={graphType} />
+            <div className="chart-container">
+                <div className="chart-container2">
+                <Chart data={graphType === "total" ? data : graphType === "active" ? activeData : deathsData} selected={selected} graphType={graphType} predictionPeriod={predictionPeriod} />
+                </div>
+            </div>
+            <div className="disclaimer mt2">
+                The prediction is only illustrative, to demonstrate the exponential growth of COVID19 disease.
+                It can be taken as a good approximation for a few days outlook. For weeks, the error is too large.
+                It's based on an exponential function built from last 10 samples. It does not take into account any actions taken to stop spreading,
+                population limits, or other real world contraints.
+            </div>
+            <div className="disclaimer">
+                Data sources: <a target="_blank" href="https://github.com/CSSEGISandData/2019-nCoV">GitHub</a>, <a target="_blank" href="https://www.worldometers.info/coronavirus/">https://www.worldometers.info/coronavirus/</a>
+            </div>
+            <div className="disclaimer">
+                Changes<br/>
+                2020-03-21: Historical growth factor (base of the exponential function) graph added<br/>
+                2020-03-22: Prediction range added - b±0.02
+            </div>
+            <div className="disclaimer">
+                Contact: <a href="mailto:pisek.petr@gmail.com">pisek.petr@gmail.com</a>
             </div>
         </div>
     )
