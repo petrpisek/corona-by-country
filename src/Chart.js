@@ -100,14 +100,14 @@ export const Chart = ({ data, selected, predictionPeriod }) => {
 
         var dataPoints = graph[0].dataPoints;
 
-        var regressionPoints = dataPoints.slice(Math.max(dataPoints.length - expSamples, 0));
+        var regressionPoints = dataPoints.slice(Math.max(dataPoints.length - expSamples - 1, 0), -1);
 
         var expCurve = expCurveFit(regressionPoints);
 
         var prediction = [];
         var start = dataPoints.length - 1;
         for (var i = start; i < dataPoints.length + predictionPeriod; i++) {
-            prediction.push({ x: dataPoints[0].x.addDays(i), y: Math.round(expCurve.a * Math.pow(expCurve.b, i - start + regressionPoints.length)) });
+            prediction.push({ x: dataPoints[0].x.addDays(i), y: Math.round(expCurve.a * Math.pow(expCurve.b, i - start + regressionPoints.length + 1)) });
         }
 
         if (predictionPeriod)
@@ -115,7 +115,7 @@ export const Chart = ({ data, selected, predictionPeriod }) => {
                 axisYIndex: 1,
                 type: "line",
                 lineDashType: "dash",
-                color: Colors[0]+"A0",
+                color: Colors[0] + "A0",
                 dataPoints: prediction,
                 showInLegend: true,
                 legendText: "World with China",
@@ -126,14 +126,14 @@ export const Chart = ({ data, selected, predictionPeriod }) => {
 
         dataPoints = graph[1].dataPoints;
 
-        regressionPoints = dataPoints.slice(Math.max(dataPoints.length - expSamples, 0));
+        regressionPoints = dataPoints.slice(Math.max(dataPoints.length - expSamples - 1, 0), -1);
 
         expCurve = expCurveFit(regressionPoints);
         curves.worldWithoutChina = expCurve;
         prediction = [];
         start = dataPoints.length - 1;
         for (var i = start; i < dataPoints.length + predictionPeriod; i++) {
-            prediction.push({ x: dataPoints[0].x.addDays(i), y: Math.round(expCurve.a * Math.pow(expCurve.b, i - start + regressionPoints.length)) });
+            prediction.push({ x: dataPoints[0].x.addDays(i), y: Math.round(expCurve.a * Math.pow(expCurve.b, i - start + regressionPoints.length + 1)) });
         }
 
         if (predictionPeriod)
@@ -141,7 +141,7 @@ export const Chart = ({ data, selected, predictionPeriod }) => {
                 axisYIndex: 1,
                 type: "line",
                 lineDashType: "dash",
-                color: Colors[1]+"A0",
+                color: Colors[1] + "A0",
                 dataPoints: prediction,
                 showInLegend: true,
                 legendText: "World without China",
@@ -174,7 +174,7 @@ export const Chart = ({ data, selected, predictionPeriod }) => {
                 dataPoints: dataPoints,
                 country: selectedCountry,
                 axisYType: "secondary",
-            });            
+            });
 
             if (predictionPeriod) {
                 const prediction = [];
@@ -182,16 +182,16 @@ export const Chart = ({ data, selected, predictionPeriod }) => {
                 const predictionHigh = [];
                 const start = dataPoints.length - 1;
                 for (var i = start; i < dataPoints.length + predictionPeriod; i++) {
-                    predictionLow.push({ x: dataPoints[0].x.addDays(i), y: Math.round(expCurve.a * Math.pow(expCurve.b+0.02, i - start + regressionPoints.length + 1)) });
+                    predictionLow.push({ x: dataPoints[0].x.addDays(i), y: Math.round(expCurve.a * Math.pow(expCurve.b + 0.02, i - start + regressionPoints.length + 1)) });
                     prediction.push({ x: dataPoints[0].x.addDays(i), y: Math.round(expCurve.a * Math.pow(expCurve.b, i - start + regressionPoints.length + 1)) });
-                    predictionHigh.push({ x: dataPoints[0].x.addDays(i), y: Math.round(expCurve.a * Math.pow(expCurve.b-0.02, i - start + regressionPoints.length + 1)) });
+                    predictionHigh.push({ x: dataPoints[0].x.addDays(i), y: Math.round(expCurve.a * Math.pow(expCurve.b - 0.02, i - start + regressionPoints.length + 1)) });
                 }
 
                 graph.push({
                     axisYIndex: 1,
                     type: "line",
                     lineDashType: "dash",
-                    color: color+"A0",
+                    color: color + "A0",
                     dataPoints: prediction,
                     country: selectedCountry,
                     axisYType: "secondary",
@@ -200,7 +200,7 @@ export const Chart = ({ data, selected, predictionPeriod }) => {
                     axisYIndex: 1,
                     type: "line",
                     lineDashType: "dash",
-                    color: color+"50",
+                    color: color + "50",
                     lineThickness: 1,
                     dataPoints: predictionLow,
                     country: selectedCountry,
@@ -211,39 +211,44 @@ export const Chart = ({ data, selected, predictionPeriod }) => {
                     type: "line",
                     lineDashType: "dash",
                     lineThickness: 1,
-                    color: color+"50",
+                    color: color + "50",
                     dataPoints: predictionHigh,
                     country: selectedCountry,
                     axisYType: "secondary",
                 });
             }
 
-            const bData = [...Array(dataPoints.length-expSamples)].map((x, i) => ({x: dataPoints[i+expSamples].x, y: +expCurveFit(dataPoints.slice(i, i+expSamples)).b.toFixed(2)}));
-            graph.push({
-                type: "line",                
-                lineDashType: "shortDot",
-                markerType: "none",
-                lineThickness: 1,
-                color: color,
-                dataPoints: bData,
-                country: selectedCountry,
-                axisYIndex: 0,                
-            });
+            try {
+                const bData = [...Array(dataPoints.length - expSamples)].map((x, i) => ({ x: dataPoints[i + expSamples].x, y: +expCurveFit(dataPoints.slice(i, i + expSamples)).b.toFixed(2) }));
+                graph.push({
+                    type: "line",
+                    lineDashType: "shortDot",
+                    markerType: "none",
+                    lineThickness: 1,
+                    color: color,
+                    dataPoints: bData,
+                    country: selectedCountry,
+                    axisYIndex: 0,
+                });
+            }
+            catch {
+
+            }
         });
     }
 
     function nFormatter(num) {
         if (num >= 1000000000) {
-           return (num / 1000000000).toFixed(1).replace(/\.0$/, '') + 'G';
+            return (num / 1000000000).toFixed(1).replace(/\.0$/, '') + 'G';
         }
         if (num >= 1000000) {
-           return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+            return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
         }
         if (num >= 1000) {
-           return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+            return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
         }
         return num;
-   }
+    }
 
     const options = {
         title: {
@@ -256,16 +261,16 @@ export const Chart = ({ data, selected, predictionPeriod }) => {
         zoomEnabled: true,
         responsive: true,
         height: height,
-        axisY2:[
+        axisY2: [
             {
                 labelFormatter: e => nFormatter(e.value),
                 title: "Cases",
                 axisYType: "secondary",
             }],
-            axisY:[{            
-                title: "Growth factor",
-                
-            }
+        axisY: [{
+            title: "Growth factor",
+
+        }
         ]
     }
 

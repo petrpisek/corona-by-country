@@ -91,17 +91,17 @@ export const DataController = (props) => {
     }
 
     const loadData = async dataType => {
-        const historicalData = fetch("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv")
+        const historicalData = fetch("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv")
             .then(res => res.text())
             .then(res => res.split("\n").map(x => CSVtoArray(x)))
             .catch(error => console.log('error', error));;
 
-        const deathsData = fetch("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv")
+        const deathsData = fetch("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv")
             .then(res => res.text())
             .then(res => res.split("\n").map(x => CSVtoArray(x)))
             .catch(error => console.log('error', error));;
 
-        const recoveredData = fetch("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv")
+        const recoveredData = fetch("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv")
             .then(res => res.text())
             .then(res => res.split("\n").map(x => CSVtoArray(x)))
             .catch(error => console.log('error', error));;
@@ -130,7 +130,7 @@ export const DataController = (props) => {
         let world = null;
         let worldWithoutChina = null;
         d.forEach((element, i) => {
-            if (!element)
+            if (!element || !element.length)
                 return;
 
             if (i === 0) {
@@ -149,12 +149,22 @@ export const DataController = (props) => {
 
             countryData[code] = (countryData[code] || 0) + dataType === "active"
                 ? Number(allCases[i][element.length - 1]) - Number(element[element.length - 1]) - Number(recoveredCases[element.length - 1])
-                : Number(element[element.length - 1]);
+                : 
+                Number(element[element.length - 1]);
 
             var activeElement = dataType === "active" ? allCases[i].slice(4) : {};
-            var recoveredElement = dataType === "active" ? recoveredCases[i].slice(4) : {};
+            var recoveredElement = {};
+            
+            if(dataType === "active") {
+                var recoveredCase = recoveredCases.find(x => x && x[1] === allCases[i][1]);
+                if(recoveredCase)
+                recoveredElement = recoveredCase.slice(4);
+            }
 
-            var numbers = element.slice(4).map((x, i) => dataType === "active" ? Number(activeElement[i]) - Number(x) - Number(recoveredElement[i]) : Number(x));
+            var numbers = 
+            element.slice(4).map((x, i) => 
+            dataType === "active" ? Number(activeElement[i]) - Number(x) - Number(recoveredElement[i]) :
+             Number(x));
 
             if (countries[code]) {
                 for (i = 0; i < countries[code].length; i++) {
@@ -280,8 +290,10 @@ export const DataController = (props) => {
             </div>
             <div className="disclaimer">
                 Changes<br/>
-                2020-03-21: Historical growth factor (base of the exponential function) graph added<br/>
-                2020-03-22: Prediction range added - b±0.02
+                2020-03-26: JHU data source format change integrated; world data predictino fixed<br/>
+                2020-03-22: Prediction range added - b±0.02<br/>
+                2020-03-21: Historical growth factor (base of the exponential function) graph added
+                
             </div>
             <div className="disclaimer">
                 Contact: <a href="mailto:pisek.petr@gmail.com">pisek.petr@gmail.com</a>
